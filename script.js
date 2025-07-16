@@ -1,4 +1,4 @@
-// Updated script.js with combined area + category filter
+// Full updated script.js with combined filter + enhancements
 
 window.addEventListener("DOMContentLoaded", async () => {
   const areaUrl = "https://www.themealdb.com/api/json/v1/1/list.php?a=list";
@@ -6,8 +6,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const areaSelect = document.getElementById("area-select");
   const resultsDiv = document.getElementById("results");
+  const loadingDiv = document.createElement("div");
+  loadingDiv.id = "loading";
+  loadingDiv.innerHTML = "<p>Loading...</p>";
+  loadingDiv.style.textAlign = "center";
+  loadingDiv.style.display = "none";
+  document.body.insertBefore(loadingDiv, resultsDiv);
 
-  // Create category select
   const categorySelect = document.createElement("select");
   categorySelect.id = "category-select";
   categorySelect.name = "category-select";
@@ -19,6 +24,31 @@ window.addEventListener("DOMContentLoaded", async () => {
   categorySelect.style.borderRadius = "4px";
   categorySelect.style.border = "1px solid #ccc";
   areaSelect.parentNode.insertBefore(categorySelect, areaSelect.nextSibling);
+
+  const searchBar = document.createElement("input");
+  searchBar.id = "search-bar";
+  searchBar.type = "text";
+  searchBar.placeholder = "Search for a meal...";
+  searchBar.style.display = "block";
+  searchBar.style.margin = "20px auto";
+  searchBar.style.padding = "10px";
+  searchBar.style.fontSize = "1rem";
+  searchBar.style.borderRadius = "6px";
+  searchBar.style.border = "1px solid #ccc";
+  areaSelect.parentNode.insertBefore(searchBar, areaSelect);
+
+  const themeToggle = document.createElement("button");
+  themeToggle.id = "toggle-theme";
+  themeToggle.innerText = "🌙 Toggle Dark Mode";
+  themeToggle.style.display = "block";
+  themeToggle.style.margin = "10px auto";
+  themeToggle.style.padding = "10px 20px";
+  themeToggle.style.fontSize = "1rem";
+  areaSelect.parentNode.insertBefore(themeToggle, searchBar);
+
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+  });
 
   try {
     const [areaRes, categoryRes] = await Promise.all([
@@ -125,21 +155,43 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     if (!selectedArea && !selectedCategory) return;
 
+    loadingDiv.style.display = "block";
+    const loaderDone = () => loadingDiv.style.display = "none";
+
     if (selectedArea && selectedCategory) {
       getCombinedMeals(selectedArea, selectedCategory).then(meals => {
+        loaderDone();
         displayMeals(meals, resultsDiv);
       });
     } else if (selectedArea) {
       fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${selectedArea}`)
         .then(res => res.json())
-        .then(data => displayMeals(data.meals, resultsDiv));
+        .then(data => {
+          loaderDone();
+          displayMeals(data.meals, resultsDiv);
+        });
     } else if (selectedCategory) {
       fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${selectedCategory}`)
         .then(res => res.json())
-        .then(data => displayMeals(data.meals, resultsDiv));
+        .then(data => {
+          loaderDone();
+          displayMeals(data.meals, resultsDiv);
+        });
     }
   }
 
   areaSelect.addEventListener("change", handleFilters);
   categorySelect.addEventListener("change", handleFilters);
+
+  searchBar.addEventListener("input", async (e) => {
+    const searchTerm = e.target.value.trim();
+    if (!searchTerm) return;
+
+    loadingDiv.style.display = "block";
+    const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`);
+    const data = await res.json();
+    loadingDiv.style.display = "none";
+    displayMeals(data.meals, resultsDiv);
+  });
 });
+

@@ -1,19 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>API Search</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>API Search</h1>
+
+  <header class="hero">
+    <h1>🌍 Explore Meals by Area & Category</h1>
+    <p>Search global cuisines and discover your next favorite recipe.</p>
+  </header>
+
+  <button id="toggle-theme">🌙 Toggle Dark Mode</button>
+
+  <input type="text" id="search-bar" placeholder="Search for a meal..." />
 
   <select name="area-select" id="area-select">
     <option value="">Select Area</option>
   </select>
 
+  <!-- Category select is injected by JS -->
+
   <div id="results"></div>
+
+  <div id="loading" style="display: none;"><p>Loading...</p></div>
+
+  <footer>
+    <p>Powered by <a href="https://www.themealdb.com" target="_blank">TheMealDB API</a> | © 2025 YourName</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
